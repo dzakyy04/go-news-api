@@ -15,4 +15,5 @@ func RouteInit(route *fiber.App) {
 
 	// Category routes
 	route.Get("/categories", controllers.GetAllCategories)
+	route.Get("/categories/:id", controllers.GetCategoryById)
 }
