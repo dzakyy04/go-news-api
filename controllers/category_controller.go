@@ -112,3 +112,24 @@ func UpdateCategory(ctx *fiber.Ctx) error {
 		"category": category,
 	})
 }
+
+func DeleteCategory(ctx *fiber.Ctx) error {
+	categoryId := ctx.Params("id")
+
+	// Check if category exists
+	var category entity.Category
+	if err := database.DB.First(&category, "id = ?", categoryId).Error; err != nil {
+		// If category not found
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Category not found", err)
+		}
+		// If error occurred
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch category", err)
+	}
+
+	if err := database.DB.Delete(&category).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete category", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Category deleted successfully", nil)
+}
