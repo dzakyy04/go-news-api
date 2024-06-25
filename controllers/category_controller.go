@@ -33,13 +33,11 @@ func GetCategoryById(ctx *fiber.Ctx) error {
 
 	// Find category by ID
 	var category entity.Category
-	err := database.DB.First(&category, "id = ?", categoryId).Error
-	if err != nil {
+	if err := database.DB.First(&category, "id = ?", categoryId).Error; err != nil {
 		// If category not found
 		if err == gorm.ErrRecordNotFound {
 			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Category not found", err)
 		}
-
 		// If error occurred
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch category", err)
 	}
@@ -73,6 +71,44 @@ func CreateCategory(ctx *fiber.Ctx) error {
 	}
 
 	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Category created successfully", fiber.Map{
+		"category": category,
+	})
+}
+
+func UpdateCategory(ctx *fiber.Ctx) error {
+	categoryId := ctx.Params("id")
+
+	// Check if category exists
+	var category entity.Category
+	if err := database.DB.First(&category, "id = ?", categoryId).Error; err != nil {
+		// If category not found
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Category not found", err)
+		}
+		// If error occurred
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch category", err)
+	}
+
+	// Parse request body
+	request := new(request.UpdateCategoryRequest)
+	if err := ctx.BodyParser(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Invalid request body", err)
+	}
+
+	// Validate request
+	if err := validate.Struct(request); err != nil {
+		return utils.SendValidationErrorResponse(ctx, err)
+	}
+
+	// Update category
+	category.Name = request.Name
+	category.Description = request.Description
+
+	if err := database.DB.Save(&category).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update category", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Category updated successfully", fiber.Map{
 		"category": category,
 	})
 }
