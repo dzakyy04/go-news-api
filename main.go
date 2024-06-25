@@ -1,15 +1,18 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"go-news-api/routes"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 func main() {
+	// Initialize fiber app
 	app := fiber.New()
 
-	app.Get("/", func(ctx *fiber.Ctx) error {
-		return ctx.JSON(fiber.Map{
-			"message": "Hello World",
-		})
-	})
+	// Initialize route
+	routes.RouteInit(app)
 
+	// Listen app on port 3000
 	app.Listen(":3000")
 }
