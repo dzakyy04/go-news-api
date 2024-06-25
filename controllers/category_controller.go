@@ -6,9 +6,12 @@ import (
 	"go-news-api/models/request"
 	"go-news-api/utils"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
+
+var validate = validator.New()
 
 func GetAllCategories(ctx *fiber.Ctx) error {
 	var categories []entity.Category
@@ -47,11 +50,16 @@ func GetCategoryById(ctx *fiber.Ctx) error {
 }
 
 func CreateCategory(ctx *fiber.Ctx) error {
-	request := new(request.CategoryRequest)
+	request := new(request.CreateCategoryRequest)
 
 	// Parse request body
 	if err := ctx.BodyParser(request); err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Invalid request body", err)
+	}
+
+	// Validate request
+	if err := validate.Struct(request); err != nil {
+		return utils.SendValidationErrorResponse(ctx, err)
 	}
 
 	// Create category
