@@ -3,6 +3,7 @@ package controllers
 import (
 	"go-news-api/database"
 	"go-news-api/models/entity"
+	"go-news-api/models/request"
 	"go-news-api/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -41,6 +42,29 @@ func GetCategoryById(ctx *fiber.Ctx) error {
 	}
 
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Category fetched successfully", fiber.Map{
+		"category": category,
+	})
+}
+
+func CreateCategory(ctx *fiber.Ctx) error {
+	request := new(request.CategoryRequest)
+
+	// Parse request body
+	if err := ctx.BodyParser(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Invalid request body", err)
+	}
+
+	// Create category
+	category := entity.Category{
+		Name:        request.Name,
+		Description: request.Description,
+	}
+
+	if err := database.DB.Create(&category).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create category", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Category created successfully", fiber.Map{
 		"category": category,
 	})
 }
