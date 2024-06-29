@@ -6,7 +6,7 @@ import (
 )
 
 func MigrateDatabase() {
-	err := DB.AutoMigrate(&entity.Category{})
+	err := DB.AutoMigrate(&entity.Category{}, &entity.User{})
 	if err != nil {
 		panic("Failed to migrate database: " + err.Error())
 	}
