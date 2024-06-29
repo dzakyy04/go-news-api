@@ -18,7 +18,7 @@ func GetAllCategories(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch categories", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Categories fetched successfully", fiber.Map{
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully fetched categories", fiber.Map{
 		"categories":      categories,
 		"totalCategories": len(categories),
 	})
@@ -33,13 +33,13 @@ func GetCategoryById(ctx *fiber.Ctx) error {
 	if err := database.DB.First(&category, "id = ?", categoryId).Error; err != nil {
 		// If category not found
 		if err == gorm.ErrRecordNotFound {
-			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Category not found", err)
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to fetch category", err)
 		}
 		// If error occurred
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch category", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Category fetched successfully", fiber.Map{
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Succesfully fetched category", fiber.Map{
 		"category": category,
 	})
 }
@@ -49,12 +49,12 @@ func CreateCategory(ctx *fiber.Ctx) error {
 
 	// Parse request body
 	if err := ctx.BodyParser(request); err != nil {
-		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Invalid request body", err)
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to create category", err)
 	}
 
 	// Validate request
 	if err := utils.Validate.Struct(request); err != nil {
-		return utils.SendValidationErrorResponse(ctx, err)
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to create category", err)
 	}
 
 	// Create category
@@ -67,7 +67,7 @@ func CreateCategory(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create category", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Category created successfully", fiber.Map{
+	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created category", fiber.Map{
 		"category": category,
 	})
 }
@@ -80,21 +80,21 @@ func UpdateCategory(ctx *fiber.Ctx) error {
 	if err := database.DB.First(&category, "id = ?", categoryId).Error; err != nil {
 		// If category not found
 		if err == gorm.ErrRecordNotFound {
-			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Category not found", err)
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to update category", err)
 		}
 		// If error occurred
-		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch category", err)
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update category", err)
 	}
 
 	// Parse request body
 	request := new(request.UpdateCategoryRequest)
 	if err := ctx.BodyParser(request); err != nil {
-		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Invalid request body", err)
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to update category", err)
 	}
 
 	// Validate request
 	if err := utils.Validate.Struct(request); err != nil {
-		return utils.SendValidationErrorResponse(ctx, err)
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to update category", err)
 	}
 
 	// Update category
@@ -105,7 +105,7 @@ func UpdateCategory(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update category", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Category updated successfully", fiber.Map{
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated category", fiber.Map{
 		"category": category,
 	})
 }
@@ -118,15 +118,15 @@ func DeleteCategory(ctx *fiber.Ctx) error {
 	if err := database.DB.First(&category, "id = ?", categoryId).Error; err != nil {
 		// If category not found
 		if err == gorm.ErrRecordNotFound {
-			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Category not found", err)
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to delete category", err)
 		}
 		// If error occurred
-		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch category", err)
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete category", err)
 	}
 
 	if err := database.DB.Delete(&category).Error; err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete category", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Category deleted successfully", nil)
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully delete category", nil)
 }

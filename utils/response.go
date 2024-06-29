@@ -6,23 +6,22 @@ import (
 )
 
 func SendErrorResponse(ctx *fiber.Ctx, status int, message string, err error) error {
-	return ctx.Status(status).JSON(fiber.Map{
+	response := fiber.Map{
 		"success": false,
 		"message": message,
-		"error":   err.Error(),
-	})
-}
-
-func SendValidationErrorResponse(ctx *fiber.Ctx, err error) error {
-	var errors []string
-	for _, err := range err.(validator.ValidationErrors) {
-		errors = append(errors, FormatValidationError(err))
 	}
-	return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-		"success": false,
-		"message": "Validation failed",
-		"errors":  errors,
-	})
+
+	if validationErrors, ok := err.(validator.ValidationErrors); ok {
+		var errors []string
+		for _, err := range validationErrors {
+			errors = append(errors, FormatValidationError(err))
+		}
+		response["errors"] = errors
+	} else if err != nil {
+		response["errors"] = []string{err.Error()}
+	}
+
+	return ctx.Status(status).JSON(response)
 }
 
 func SendSuccessResponse(ctx *fiber.Ctx, status int, message string, data interface{}) error {
