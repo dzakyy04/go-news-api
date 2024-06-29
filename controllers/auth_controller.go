@@ -18,7 +18,7 @@ func Register(ctx *fiber.Ctx) error {
 	}
 
 	// Validate request
-	if err := validate.Struct(request); err != nil {
+	if err := utils.Validate.Struct(request); err != nil {
 		return utils.SendValidationErrorResponse(ctx, err)
 	}
 

@@ -6,12 +6,9 @@ import (
 	"go-news-api/models/request"
 	"go-news-api/utils"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
-
-var validate = validator.New()
 
 func GetAllCategories(ctx *fiber.Ctx) error {
 	var categories []entity.Category
@@ -56,7 +53,7 @@ func CreateCategory(ctx *fiber.Ctx) error {
 	}
 
 	// Validate request
-	if err := validate.Struct(request); err != nil {
+	if err := utils.Validate.Struct(request); err != nil {
 		return utils.SendValidationErrorResponse(ctx, err)
 	}
 
@@ -96,7 +93,7 @@ func UpdateCategory(ctx *fiber.Ctx) error {
 	}
 
 	// Validate request
-	if err := validate.Struct(request); err != nil {
+	if err := utils.Validate.Struct(request); err != nil {
 		return utils.SendValidationErrorResponse(ctx, err)
 	}
 

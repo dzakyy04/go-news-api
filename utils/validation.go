@@ -4,6 +4,12 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+var Validate *validator.Validate
+
+func init() {
+	Validate = validator.New()
+}
+
 func FormatValidationError(err validator.FieldError) string {
 	switch err.Tag() {
 	case "required":
