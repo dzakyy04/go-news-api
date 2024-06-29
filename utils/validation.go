@@ -1,6 +1,8 @@
 package utils
 
-import "github.com/go-playground/validator/v10"
+import (
+	"github.com/go-playground/validator/v10"
+)
 
 func FormatValidationError(err validator.FieldError) string {
 	switch err.Tag() {
@@ -10,6 +12,8 @@ func FormatValidationError(err validator.FieldError) string {
 		return err.Field() + " must be at least " + err.Param() + " characters long"
 	case "max":
 		return err.Field() + " must be at most " + err.Param() + " characters long"
+	case "email":
+		return err.Field() + " must be a valid email address"
 	default:
 		return err.Error()
 	}
