@@ -10,3 +10,7 @@ type LoginRequest struct {
 	Email    string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
+
+type SendVerificationEmailRequest struct {
+	Email string `json:"email" validate:"required,email"`
+}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"gorm.io/gorm"
 )
 
 func Register(ctx *fiber.Ctx) error {
@@ -87,4 +88,71 @@ func Login(ctx *fiber.Ctx) error {
 		"token": token,
 		"user":  user,
 	})
+}
+
+func SendVerificationEmail(ctx *fiber.Ctx) error {
+	request := new(request.SendVerificationEmailRequest)
+
+	// Parse request body
+	if err := ctx.BodyParser(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to send verification email", err)
+	}
+
+	// Validate request
+	if err := utils.Validate.Struct(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to send verification email", err)
+	}
+
+	// Find user
+	var user entity.User
+	if err := database.DB.Where("email = ?", request.Email).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to send verification email", err)
+		}
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to send verification email", err)
+	}
+
+	// Generate OTP
+	otp := utils.GenerateOTP(4)
+	otpExpiredAt := time.Now().Add(time.Minute * 10)
+
+	// Check if OTP already exists for the user
+	var existingOtp entity.OtpCode
+	err := database.DB.Where("user_id = ? AND type = ?", user.ID, entity.EmailVerification).First(&existingOtp).Error
+
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to send verification email", err)
+	}
+
+	if err == gorm.ErrRecordNotFound {
+		// Create new OTP
+		otpCode := entity.OtpCode{
+			Otp:       otp,
+			ExpiredAt: otpExpiredAt,
+			Type:      entity.EmailVerification,
+			UserID:    user.ID,
+		}
+
+		if err := database.DB.Create(&otpCode).Error; err != nil {
+			return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to send verification email", err)
+		}
+	} else {
+		// Update existing OTP
+		existingOtp.Otp = otp
+		existingOtp.ExpiredAt = otpExpiredAt
+
+		if err := database.DB.Save(&existingOtp).Error; err != nil {
+			return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to send verification email", err)
+		}
+	}
+
+	// Send email
+	if err := utils.SendEmail(user.Email, "Verify your email", "views/emails/verification.html", fiber.Map{
+		"name": user.Name,
+		"otp":  otp,
+	}); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to send verification email", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully sent verification email", nil)
 }

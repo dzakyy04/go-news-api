@@ -23,4 +23,5 @@ func RouteInit(route *fiber.App) {
 	// Auth routes
 	route.Post("/register", controllers.Register)
 	route.Post("/login", controllers.Login)
+	route.Post("/verification-email", controllers.SendVerificationEmail)
 }
