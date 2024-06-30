@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"go-news-api/database"
 	"go-news-api/models/entity"
 	"go-news-api/models/request"
@@ -155,4 +156,59 @@ func SendVerificationEmail(ctx *fiber.Ctx) error {
 	}
 
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully sent verification email", nil)
+}
+
+func VerifyEmail(ctx *fiber.Ctx) error {
+	request := new(request.VerifyEmailRequest)
+
+	// Parse request body
+	if err := ctx.BodyParser(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to verify email", err)
+	}
+
+	// Check if user exists
+	var user entity.User
+	err := database.DB.Where("email = ?", request.Email).First(&user).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to verify email", err)
+		}
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to verify email", err)
+	}
+
+	// Check if email is already verified
+	if user.IsVerified {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to verify email", errors.New("email is already verified"))
+	}
+
+	// Check if OTP is valid
+	var otpCode entity.OtpCode
+	err = database.DB.Where("user_id = ? AND type = ?", user.ID, entity.EmailVerification).First(&otpCode).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusUnauthorized, "Failed to verify email", errors.New("invalid or expired OTP code"))
+		}
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to verify email", err)
+	}
+
+	if otpCode.Otp != request.Otp || time.Now().After(otpCode.ExpiredAt) {
+		return utils.SendErrorResponse(ctx, fiber.StatusUnauthorized, "Failed to verify email", errors.New("invalid or expired OTP code"))
+	}
+
+	// Update user's email verification status
+	err = database.DB.Model(&user).Updates(map[string]interface{}{
+		"is_verified": true,
+	}).Error
+	if err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to verify email", err)
+	}
+
+	// Remove OTP code after successful verification
+	if err := database.DB.Delete(&otpCode).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to clean up OTP code", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Email has been verified", fiber.Map{
+		"user": user,
+	})
 }

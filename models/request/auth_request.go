@@ -14,3 +14,8 @@ type LoginRequest struct {
 type SendVerificationEmailRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
+
+type VerifyEmailRequest struct {
+	Email string `json:"email" validate:"required,email"`
+	Otp	string `json:"otp" validate:"required"`
+}
