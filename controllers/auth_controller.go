@@ -113,6 +113,11 @@ func SendVerificationEmail(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to send verification email", err)
 	}
 
+	// Check if email is already verified
+	if user.IsVerified {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to send verification email", errors.New("email is already verified"))
+	}
+
 	// Generate OTP
 	otp := utils.GenerateOTP(4)
 	otpExpiredAt := time.Now().Add(time.Minute * 10)
