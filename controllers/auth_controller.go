@@ -210,10 +210,23 @@ func VerifyEmail(ctx *fiber.Ctx) error {
 
 	// Remove OTP code after successful verification
 	if err := database.DB.Delete(&otpCode).Error; err != nil {
-		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to clean up OTP code", err)
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to verify email", err)
 	}
 
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Email has been verified", fiber.Map{
+		"user": user,
+	})
+}
+
+func GetProfile(ctx *fiber.Ctx) error {
+	// Get user from context
+	user := ctx.Locals("user").(*entity.User)
+
+	if user == nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusUnauthorized, "Unauthorized", errors.New("user not found"))
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully get profile", fiber.Map{
 		"user": user,
 	})
 }

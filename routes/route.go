@@ -2,6 +2,7 @@ package routes
 
 import (
 	"go-news-api/controllers"
+	"go-news-api/middleware"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -25,4 +26,5 @@ func RouteInit(route *fiber.App) {
 	route.Post("/login", controllers.Login)
 	route.Post("/verification-email", controllers.SendVerificationEmail)
 	route.Post("/verify-email", controllers.VerifyEmail)
+	route.Get("/profile", middleware.AuthMiddleware, controllers.GetProfile)
 }

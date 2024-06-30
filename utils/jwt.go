@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -15,4 +16,13 @@ func GenerateToken(claims *jwt.MapClaims) (string, error) {
 		return "", err
 	}
 	return jwt, nil
+}
+
+func ParseToken(tokenString string) (*jwt.Token, error) {
+	return jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return jwtKey, nil
+	})
 }
