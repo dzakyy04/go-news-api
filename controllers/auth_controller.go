@@ -297,3 +297,55 @@ func SendResetPasswordEmail(ctx *fiber.Ctx) error {
 
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully sent reset password email", nil)
 }
+
+func VerifyOtpReset(ctx *fiber.Ctx) error {
+	request := new(request.VerifyOtpResetRequest)
+
+	// Parse request body
+	if err := ctx.BodyParser(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to verify OTP", err)
+	}
+
+	// Validate request
+	if err := utils.Validate.Struct(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to verify OTP", err)
+	}
+
+	// Find user
+	var user entity.User
+	if err := database.DB.Where("email = ?", request.Email).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to verify OTP", err)
+		}
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to verify OTP", err)
+	}
+
+	// Find OTP
+	var otpCode entity.OtpCode
+	if err := database.DB.Where("user_id = ? AND type = ?", user.ID, entity.PasswordReset).First(&otpCode).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to verify OTP", err)
+		}
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to verify OTP", err)
+	}
+
+	// Check if OTP is already verified
+	if otpCode.IsVerified {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to verify OTP", errors.New("otp is already verified"))
+	}
+
+	// Check if OTP is valid
+	if otpCode.Otp != request.Otp || time.Now().After(otpCode.ExpiredAt) {
+		return utils.SendErrorResponse(ctx, fiber.StatusUnauthorized, "Failed to verify OTP", errors.New("invalid or expired OTP code"))
+	}
+
+	// Set OTP to verified
+	err := database.DB.Model(&otpCode).Updates(map[string]interface{}{
+		"is_verified": true,
+	}).Error
+	if err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to verify OTP", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully verified OTP", nil)
+}

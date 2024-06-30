@@ -24,3 +24,8 @@ type VerifyEmailRequest struct {
 type SendResetPasswordEmailRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
+
+type VerifyOtpResetRequest struct {
+	Email string `json:"email" validate:"required,email"`
+	Otp   string `json:"otp" validate:"required"`
+}
