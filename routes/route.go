@@ -32,4 +32,5 @@ func RouteInit(route *fiber.App) {
 	api.Get("/profile", middleware.AuthMiddleware, controllers.GetProfile)
 	api.Post("/reset-password/request", controllers.SendResetPasswordEmail)
 	api.Post("/reset-password/verify", controllers.VerifyOtpReset)
+	api.Post("/reset-password", controllers.ResetPassword)
 }

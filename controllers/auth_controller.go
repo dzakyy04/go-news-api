@@ -349,3 +349,54 @@ func VerifyOtpReset(ctx *fiber.Ctx) error {
 
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully verified OTP", nil)
 }
+
+func ResetPassword(ctx *fiber.Ctx) error {
+	request := new(request.ResetPasswordRequest)
+
+	// Parse request body
+	if err := ctx.BodyParser(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to reset password", err)
+	}
+
+	// Validate request
+	if err := utils.Validate.Struct(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to reset password", err)
+	}
+
+	// Find user
+	var user entity.User
+	if err := database.DB.Where("email = ?", request.Email).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to reset password", err)
+		}
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to reset password", err)
+	}
+
+	// Find OTP
+	var otpCode entity.OtpCode
+	if err := database.DB.Where("user_id = ? AND type = ?", user.ID, entity.PasswordReset).First(&otpCode).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to reset password", err)
+		}
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to reset password", err)
+	}
+
+	// Check if OTP is already verified
+	if !otpCode.IsVerified {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to reset password", errors.New("otp is not verified"))
+	}
+
+	// Hash password
+	newHashedPassword, err := utils.HashPassword(request.NewPassword)
+	if err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to reset password", err)
+	}
+
+	// Update password
+	err = database.DB.Model(&user).Update("password", newHashedPassword).Error
+	if err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to reset password", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully reset password", nil)
+}
