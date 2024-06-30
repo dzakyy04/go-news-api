@@ -20,6 +20,8 @@ func FormatValidationError(err validator.FieldError) string {
 		return err.Field() + " must be at most " + err.Param() + " characters long"
 	case "email":
 		return err.Field() + " must be a valid email address"
+	case "eqfield":
+		return err.Field() + " must be equal to " + err.Param()
 	default:
 		return err.Error()
 	}
