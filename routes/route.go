@@ -14,18 +14,21 @@ func RouteInit(route *fiber.App) {
 		})
 	})
 
+	// Prefix /api
+	api := route.Group("/api")
+
 	// Category routes
-	route.Get("/categories", controllers.GetAllCategories)
-	route.Get("/categories/:id", controllers.GetCategoryById)
-	route.Post("/categories", controllers.CreateCategory)
-	route.Put("/categories/:id", controllers.UpdateCategory)
-	route.Delete("/categories/:id", controllers.DeleteCategory)
+	api.Get("/categories", controllers.GetAllCategories)
+	api.Get("/categories/:id", controllers.GetCategoryById)
+	api.Post("/categories", controllers.CreateCategory)
+	api.Put("/categories/:id", controllers.UpdateCategory)
+	api.Delete("/categories/:id", controllers.DeleteCategory)
 
 	// Auth routes
-	route.Post("/register", controllers.Register)
-	route.Post("/login", controllers.Login)
-	route.Post("/verification-email", controllers.SendVerificationEmail)
-	route.Post("/verify-email", controllers.VerifyEmail)
-	route.Get("/profile", middleware.AuthMiddleware, controllers.GetProfile)
-	route.Post("/forgot-password", controllers.SendResetPasswordEmail)
+	api.Post("/register", controllers.Register)
+	api.Post("/login", controllers.Login)
+	api.Post("/email-verification/request", controllers.SendVerificationEmail)
+	api.Post("/email-verification/verify", controllers.VerifyEmail)
+	api.Get("/profile", middleware.AuthMiddleware, controllers.GetProfile)
+	api.Post("/reset-password/request", controllers.SendResetPasswordEmail)
 }
