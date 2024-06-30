@@ -27,4 +27,5 @@ func RouteInit(route *fiber.App) {
 	route.Post("/verification-email", controllers.SendVerificationEmail)
 	route.Post("/verify-email", controllers.VerifyEmail)
 	route.Get("/profile", middleware.AuthMiddleware, controllers.GetProfile)
+	route.Post("/forgot-password", controllers.SendResetPasswordEmail)
 }
