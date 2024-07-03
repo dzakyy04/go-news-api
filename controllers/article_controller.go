@@ -3,6 +3,7 @@ package controllers
 import (
 	"go-news-api/database"
 	"go-news-api/models/entity"
+	"go-news-api/models/request"
 	"go-news-api/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -39,6 +40,42 @@ func GetArticleById(ctx *fiber.Ctx) error {
 	}
 
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Succesfully fetched article", fiber.Map{
+		"article": article,
+	})
+}
+
+func CreateArticle(ctx *fiber.Ctx) error {
+	request := new(request.CreateArticleRequest)
+
+	// Parse request body
+	if err := ctx.BodyParser(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to create article", err)
+	}
+
+	// Validate request
+	if err := utils.Validate.Struct(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to create article", err)
+	}
+
+	// Create article
+	article := entity.Article{
+		Title:      request.Title,
+		Slug:       request.Slug,
+		Thumbnail:  request.Thumbnail,
+		Content:    request.Content,
+		CategoryID: request.CategoryID,
+		AuthorID:   request.AuthorID,
+	}
+
+	if err := database.DB.Create(&article).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
+	}
+
+	if err := database.DB.Preload("Category").Preload("Author").First(&article, article.ID).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created article", fiber.Map{
 		"article": article,
 	})
 }
