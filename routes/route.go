@@ -14,6 +14,9 @@ func RouteInit(route *fiber.App) {
 		})
 	})
 
+	// Static asset
+	route.Static("/public", "./public")
+
 	// Prefix /api
 	api := route.Group("/api")
 

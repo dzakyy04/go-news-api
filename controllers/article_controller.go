@@ -57,11 +57,17 @@ func CreateArticle(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to create article", err)
 	}
 
+	// Save the thumbnail file
+	thumbnailPath, err := utils.SaveImageFile(ctx, "thumbnail", "./public/uploads/thumbnails")
+	if err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to save thumbnail", err)
+	}
+
 	// Create article
 	article := entity.Article{
 		Title:      request.Title,
 		Slug:       request.Slug,
-		Thumbnail:  request.Thumbnail,
+		Thumbnail:  thumbnailPath,
 		Content:    request.Content,
 		CategoryID: request.CategoryID,
 		AuthorID:   request.AuthorID,
