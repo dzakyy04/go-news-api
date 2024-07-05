@@ -145,3 +145,30 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 		"article": article,
 	})
 }
+
+func DeleteArticle(ctx *fiber.Ctx) error {
+	articleSLug := ctx.Params("slug")
+
+	// Check if article exist
+	var article entity.Article
+	if err := database.DB.First(&article, "slug = ?", articleSLug).Error; err != nil {
+		// If article not found
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to delete article", err)
+		}
+		// If error occurred
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete article", err)
+	}
+
+	// Delete thumbnail
+	if err := utils.DeleteFile(article.Thumbnail); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete article", err)
+	}
+
+	// Delete article
+	if err := database.DB.Delete(&article).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete article", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully deleted article", nil)
+}
