@@ -41,4 +41,5 @@ func RouteInit(route *fiber.App) {
 	api.Get("/articles", controllers.GetAllArticles)
 	api.Get("/articles/:id", controllers.GetArticleById)
 	api.Post("/articles", controllers.CreateArticle)
+	api.Put("/articles/:slug", controllers.UpdateArticle)
 }

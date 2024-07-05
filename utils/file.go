@@ -51,3 +51,11 @@ func SaveImageFile(ctx *fiber.Ctx, key string, path string) (string, error) {
 
 	return filePath, nil
 }
+
+func DeleteFile(path string) error {
+	if err := os.Remove(path); err != nil {
+		return err
+	}
+
+	return nil
+}
