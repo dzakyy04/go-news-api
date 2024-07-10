@@ -60,3 +60,30 @@ func CreateComment(ctx *fiber.Ctx) error {
 		"comment": comment,
 	})
 }
+
+func DeleteComment(ctx *fiber.Ctx) error {
+	// Get User
+	user := ctx.Locals("user").(*entity.User)
+	if user == nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusUnauthorized, "Failed to delete comment", errors.New("user not found"))
+	}
+
+	// Check if comment exist
+	commentID := ctx.Params("id")
+	var comment entity.Comment
+	if err := database.DB.First(&comment, "id = ?", commentID).Error; err != nil {
+		// If comment not found
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to delete comment", err)
+		}
+		// If error occurred
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete comment", err)
+	}
+
+	// Delete comment
+	if err := database.DB.Delete(&comment).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete comment", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully deleted comment", nil)
+}

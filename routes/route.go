@@ -46,4 +46,5 @@ func RouteInit(route *fiber.App) {
 
 	// Comment routes
 	api.Post("/articles/:slug/comments", middleware.AuthMiddleware, controllers.CreateComment)
+	api.Delete("/articles/:slug/comments/:id", middleware.AuthMiddleware, controllers.DeleteComment)
 }
