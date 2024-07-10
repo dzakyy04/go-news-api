@@ -21,6 +21,7 @@ type Article struct {
 	Author     User          `gorm:"foreignKey:AuthorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"author"`
 	AuthorID   uint          `gorm:"not null" json:"author_id"`
 	Status     ArticleStatus `gorm:"type:enum('draft', 'published', 'archived');default:draft" json:"status"`
+	Comments   []Comment     `gorm:"foreignKey:ArticleID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"comments"`
 	CreatedAt  time.Time     `json:"created_at"`
 	UpdatedAt  time.Time     `json:"updated_at"`
 }

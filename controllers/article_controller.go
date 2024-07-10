@@ -14,7 +14,10 @@ func GetAllArticles(ctx *fiber.Ctx) error {
 	var articles []entity.Article
 
 	// Fetch all articles
-	if err := database.DB.Preload("Category").Preload("Author").Find(&articles).Error; err != nil {
+	if err := database.DB.Preload("Category").
+		Preload("Author").
+		Preload("Comments.User").
+		Find(&articles).Error; err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch articles", err)
 	}
 
@@ -30,7 +33,10 @@ func GetArticleById(ctx *fiber.Ctx) error {
 
 	// Find article by ID
 	var article entity.Article
-	if err := database.DB.Preload("Category").Preload("Author").First(&article, "id = ?", articleId).Error; err != nil {
+	if err := database.DB.Preload("Category").
+		Preload("Author").
+		Preload("Comments.User").
+		First(&article, "id = ?", articleId).Error; err != nil {
 		// If article not found
 		if err == gorm.ErrRecordNotFound {
 			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to fetch article", err)
@@ -77,7 +83,7 @@ func CreateArticle(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
 	}
 
-	if err := database.DB.Preload("Category").Preload("Author").First(&article, article.ID).Error; err != nil {
+	if err := database.DB.Preload("Category").Preload("Author").Preload("Comments.User").First(&article, article.ID).Error; err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
 	}
 
@@ -87,11 +93,11 @@ func CreateArticle(ctx *fiber.Ctx) error {
 }
 
 func UpdateArticle(ctx *fiber.Ctx) error {
-	articleSLug := ctx.Params("slug")
+	articleSlug := ctx.Params("slug")
 
 	// Check if article exist
 	var article entity.Article
-	if err := database.DB.First(&article, "slug = ?", articleSLug).Error; err != nil {
+	if err := database.DB.First(&article, "slug = ?", articleSlug).Error; err != nil {
 		// If article not found
 		if err == gorm.ErrRecordNotFound {
 			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to update article", err)
@@ -137,7 +143,7 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update article", err)
 	}
 
-	if err := database.DB.Preload("Category").Preload("Author").First(&article, article.ID).Error; err != nil {
+	if err := database.DB.Preload("Category").Preload("Author").Preload("Comments.User").First(&article, article.ID).Error; err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update article", err)
 	}
 
@@ -147,11 +153,11 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 }
 
 func DeleteArticle(ctx *fiber.Ctx) error {
-	articleSLug := ctx.Params("slug")
+	articleSlug := ctx.Params("slug")
 
 	// Check if article exist
 	var article entity.Article
-	if err := database.DB.First(&article, "slug = ?", articleSLug).Error; err != nil {
+	if err := database.DB.First(&article, "slug = ?", articleSlug).Error; err != nil {
 		// If article not found
 		if err == gorm.ErrRecordNotFound {
 			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to delete article", err)
