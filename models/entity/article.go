@@ -18,6 +18,7 @@ type Article struct {
 	Content    string        `gorm:"type:text;not null" json:"content"`
 	CategoryID uint          `gorm:"not null" json:"category_id"`
 	Category   Category      `gorm:"foreignKey:CategoryID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"category"`
+	Tags       []Tag         `gorm:"many2many:article_tags;" json:"tags"`
 	Author     User          `gorm:"foreignKey:AuthorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"author"`
 	AuthorID   uint          `gorm:"not null" json:"author_id"`
 	Status     ArticleStatus `gorm:"type:enum('draft', 'published', 'archived');default:draft" json:"status"`
