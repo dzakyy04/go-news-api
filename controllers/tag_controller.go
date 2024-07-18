@@ -103,5 +103,27 @@ func UpdateTag(ctx *fiber.Ctx) error {
 
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated tag", fiber.Map{
 		"tag": tag,
-	});
+	})
+}
+
+func DeleteTag(ctx *fiber.Ctx) error {
+	tagId := ctx.Params("id")
+
+	// Check if tag exist
+	var tag entity.Tag
+	if err := database.DB.First(&tag, "id = ?", tagId).Error; err != nil {
+		// If tag not found
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to delete tag", err)
+		}
+		// If error occurred
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete tag", err)
+	}
+
+	// Delete tag
+	if err := database.DB.Delete(&tag).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete tag", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully deleted tag", nil)
 }
