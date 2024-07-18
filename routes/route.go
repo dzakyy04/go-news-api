@@ -51,4 +51,5 @@ func RouteInit(route *fiber.App) {
 
 	// Tag routes
 	api.Get("/tags", controllers.GetAllTags)
+	api.Get("/tags/:id", controllers.GetTagById)
 }
