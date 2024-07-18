@@ -3,6 +3,7 @@ package controllers
 import (
 	"go-news-api/database"
 	"go-news-api/models/entity"
+	"go-news-api/models/request"
 	"go-news-api/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -39,6 +40,33 @@ func GetTagById(ctx *fiber.Ctx) error {
 	}
 
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Succesfully fetched tag", fiber.Map{
+		"tag": tag,
+	})
+}
+
+func CreateTag(ctx *fiber.Ctx) error {
+	request := new(request.CreateTagRequest)
+
+	// Parse request body
+	if err := ctx.BodyParser(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to create tag", err)
+	}
+
+	// Validate request
+	if err := utils.Validate.Struct(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to create tag", err)
+	}
+
+	// Create tag
+	tag := entity.Tag{
+		Name: request.Name,
+	}
+
+	if err := database.DB.Create(&tag).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create tag", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created tag", fiber.Map{
 		"tag": tag,
 	})
 }
