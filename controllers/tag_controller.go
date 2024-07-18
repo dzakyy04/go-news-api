@@ -45,7 +45,7 @@ func GetTagById(ctx *fiber.Ctx) error {
 }
 
 func CreateTag(ctx *fiber.Ctx) error {
-	request := new(request.CreateTagRequest)
+	request := new(request.CrudTagRequest)
 
 	// Parse request body
 	if err := ctx.BodyParser(request); err != nil {
@@ -69,4 +69,39 @@ func CreateTag(ctx *fiber.Ctx) error {
 	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created tag", fiber.Map{
 		"tag": tag,
 	})
+}
+
+func UpdateTag(ctx *fiber.Ctx) error {
+	tagId := ctx.Params("id")
+
+	// Check if tag exist
+	var tag entity.Tag
+	if err := database.DB.First(&tag, "id = ?", tagId).Error; err != nil {
+		// If tag not found
+		if err == gorm.ErrRecordNotFound {
+			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to update tag", err)
+		}
+		// If error occurred
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update tag", err)
+	}
+
+	// Parse request body
+	request := new(request.CrudTagRequest)
+	if err := ctx.BodyParser(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to update tag", err)
+	}
+
+	// Validate request
+	if err := utils.Validate.Struct(request); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to update tag", err)
+	}
+
+	// Update tag
+	if err := database.DB.Model(&tag).Updates(request).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update tag", err)
+	}
+
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated tag", fiber.Map{
+		"tag": tag,
+	});
 }
