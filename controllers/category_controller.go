@@ -18,7 +18,7 @@ func GetAllCategories(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch categories", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully fetched categories", fiber.Map{
+	return utils.SendSuccessResponseWithData(ctx, fiber.StatusOK, "Successfully fetched categories", fiber.Map{
 		"categories":      categories,
 		"totalCategories": len(categories),
 	})
@@ -39,7 +39,7 @@ func GetCategoryById(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch category", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Succesfully fetched category", fiber.Map{
+	return utils.SendSuccessResponseWithData(ctx, fiber.StatusOK, "Succesfully fetched category", fiber.Map{
 		"category": category,
 	})
 }
@@ -67,9 +67,7 @@ func CreateCategory(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create category", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created category", fiber.Map{
-		"category": category,
-	})
+	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created category")
 }
 
 func UpdateCategory(ctx *fiber.Ctx) error {
@@ -105,9 +103,7 @@ func UpdateCategory(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update category", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated category", fiber.Map{
-		"category": category,
-	})
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated category")
 }
 
 func DeleteCategory(ctx *fiber.Ctx) error {
@@ -128,5 +124,5 @@ func DeleteCategory(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete category", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully delete category", nil)
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully delete category")
 }

@@ -18,7 +18,7 @@ func GetAllTags(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch tags", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully fetched tags", fiber.Map{
+	return utils.SendSuccessResponseWithData(ctx, fiber.StatusOK, "Successfully fetched tags", fiber.Map{
 		"tags":      tags,
 		"totalTags": len(tags),
 	})
@@ -39,7 +39,7 @@ func GetTagById(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch tag", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Succesfully fetched tag", fiber.Map{
+	return utils.SendSuccessResponseWithData(ctx, fiber.StatusOK, "Succesfully fetched tag", fiber.Map{
 		"tag": tag,
 	})
 }
@@ -66,9 +66,7 @@ func CreateTag(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create tag", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created tag", fiber.Map{
-		"tag": tag,
-	})
+	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created tag")
 }
 
 func UpdateTag(ctx *fiber.Ctx) error {
@@ -101,9 +99,7 @@ func UpdateTag(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update tag", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated tag", fiber.Map{
-		"tag": tag,
-	})
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated tag")
 }
 
 func DeleteTag(ctx *fiber.Ctx) error {
@@ -125,5 +121,5 @@ func DeleteTag(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete tag", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully deleted tag", nil)
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully deleted tag")
 }

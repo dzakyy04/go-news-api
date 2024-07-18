@@ -24,7 +24,14 @@ func SendErrorResponse(ctx *fiber.Ctx, status int, message string, err error) er
 	return ctx.Status(status).JSON(response)
 }
 
-func SendSuccessResponse(ctx *fiber.Ctx, status int, message string, data interface{}) error {
+func SendSuccessResponse(ctx *fiber.Ctx, status int, message string) error {
+	return ctx.Status(status).JSON(fiber.Map{
+		"success": true,
+		"message": message,
+	})
+}
+
+func SendSuccessResponseWithData(ctx *fiber.Ctx, status int, message string, data interface{}) error {
 	return ctx.Status(status).JSON(fiber.Map{
 		"success": true,
 		"message": message,

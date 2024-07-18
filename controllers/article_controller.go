@@ -21,7 +21,7 @@ func GetAllArticles(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch articles", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully fetched articles", fiber.Map{
+	return utils.SendSuccessResponseWithData(ctx, fiber.StatusOK, "Successfully fetched articles", fiber.Map{
 		"articles":      articles,
 		"totalArticles": len(articles),
 	})
@@ -45,7 +45,7 @@ func GetArticleById(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch article", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Succesfully fetched article", fiber.Map{
+	return utils.SendSuccessResponseWithData(ctx, fiber.StatusOK, "Succesfully fetched article", fiber.Map{
 		"article": article,
 	})
 }
@@ -87,9 +87,7 @@ func CreateArticle(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created article", fiber.Map{
-		"article": article,
-	})
+	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created article")
 }
 
 func UpdateArticle(ctx *fiber.Ctx) error {
@@ -147,9 +145,7 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update article", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated article", fiber.Map{
-		"article": article,
-	})
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated article")
 }
 
 func DeleteArticle(ctx *fiber.Ctx) error {
@@ -176,5 +172,5 @@ func DeleteArticle(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete article", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully deleted article", nil)
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully deleted article")
 }

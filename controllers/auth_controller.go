@@ -44,9 +44,7 @@ func Register(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to register", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Sucessfully registered", fiber.Map{
-		"user": user,
-	})
+	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Sucessfully registered")
 }
 
 func Login(ctx *fiber.Ctx) error {
@@ -85,7 +83,7 @@ func Login(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to login", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully logged in", fiber.Map{
+	return utils.SendSuccessResponseWithData(ctx, fiber.StatusOK, "Successfully logged in", fiber.Map{
 		"token": token,
 		"user":  user,
 	})
@@ -160,7 +158,7 @@ func SendVerificationEmail(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to send verification email", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully sent verification email", nil)
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully sent verification email")
 }
 
 func VerifyEmail(ctx *fiber.Ctx) error {
@@ -213,9 +211,7 @@ func VerifyEmail(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to verify email", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Email has been verified", fiber.Map{
-		"user": user,
-	})
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Email has been verified")
 }
 
 func GetProfile(ctx *fiber.Ctx) error {
@@ -226,9 +222,7 @@ func GetProfile(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusUnauthorized, "Unauthorized", errors.New("user not found"))
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully get profile", fiber.Map{
-		"user": user,
-	})
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully get profile")
 }
 
 func SendResetPasswordEmail(ctx *fiber.Ctx) error {
@@ -295,7 +289,7 @@ func SendResetPasswordEmail(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to send reset password email", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully sent reset password email", nil)
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully sent reset password email")
 }
 
 func VerifyOtpReset(ctx *fiber.Ctx) error {
@@ -347,7 +341,7 @@ func VerifyOtpReset(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to verify OTP", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully verified OTP", nil)
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully verified OTP")
 }
 
 func ResetPassword(ctx *fiber.Ctx) error {
@@ -398,5 +392,5 @@ func ResetPassword(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to reset password", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully reset password", nil)
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully reset password")
 }

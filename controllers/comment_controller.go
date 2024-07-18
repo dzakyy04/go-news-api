@@ -56,9 +56,7 @@ func CreateComment(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create comment", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created comment", fiber.Map{
-		"comment": comment,
-	})
+	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created comment")
 }
 
 func UpdateComment(ctx *fiber.Ctx) error {
@@ -98,9 +96,7 @@ func UpdateComment(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update comment", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated comment", fiber.Map{
-		"comment": comment,
-	})
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated comment")
 }
 
 func DeleteComment(ctx *fiber.Ctx) error {
@@ -127,5 +123,5 @@ func DeleteComment(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete comment", err)
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully deleted comment", nil)
+	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully deleted comment")
 }
