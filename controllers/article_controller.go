@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"go-news-api/database"
 	"go-news-api/models/entity"
 	"go-news-api/models/request"
@@ -73,16 +74,22 @@ func GetArticleBySlug(ctx *fiber.Ctx) error {
 // @Tags Articles
 // @Accept  multipart/form-data
 // @Produce  json
+// @Param Authorization header string true "Bearer token"
 // @Param title formData string true "Article Title"
 // @Param slug formData string true "Article Slug"
 // @Param thumbnail formData file true "Article Thumbnail"
 // @Param content formData string true "Article Content"
 // @Param category_id formData int true "Category ID"
-// @Param author_id formData int true "Author ID"
 // @Param tags formData []string true "Article Tags (can be multiple)" collectionFormat(multi)
 // @Router /articles [post]
 func CreateArticle(ctx *fiber.Ctx) error {
-	request := new(request.ArticleRequest)
+	// Get User
+	user := ctx.Locals("user").(*entity.User)
+	if user == nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusUnauthorized, "Failed to create article", errors.New("user not found"))
+	}
+
+	request := new(request.CreateArticleRequest)
 
 	// Parse request body
 	if err := ctx.BodyParser(request); err != nil {
@@ -107,7 +114,7 @@ func CreateArticle(ctx *fiber.Ctx) error {
 		Thumbnail:  thumbnailPath,
 		Content:    request.Content,
 		CategoryID: request.CategoryID,
-		AuthorID:   request.AuthorID,
+		AuthorID:   user.ID,
 	}
 
 	// Handle tags
@@ -134,19 +141,19 @@ func CreateArticle(ctx *fiber.Ctx) error {
 // @Tags Articles
 // @Accept  multipart/form-data
 // @Produce  json
+// @Param Authorization header string true "Bearer token"
 // @Param slug path string true "Article Slug"
-// @Param title formData string true "Article Title"
-// @Param slug formData string true "Article Slug"
-// @Param thumbnail formData file true "Article Thumbnail"
-// @Param content formData string true "Article Content"
-// @Param category_id formData int true "Category ID"
-// @Param author_id formData int true "Author ID"
-// @Param tags formData []string true "Article Tags (can be multiple)" collectionFormat(multi)
+// @Param title formData string false "Article Title"
+// @Param slug formData string false "Article Slug"
+// @Param thumbnail formData file false "Article Thumbnail"
+// @Param content formData string false "Article Content"
+// @Param category_id formData int false "Category ID"
+// @Param tags formData []string false "Article Tags (can be multiple)" collectionFormat(multi)
 // @Router /articles/{slug} [put]
 func UpdateArticle(ctx *fiber.Ctx) error {
 	articleSlug := ctx.Params("slug")
 
-	// Check if article exist
+	// Check if article exists
 	var article entity.Article
 	if err := database.DB.First(&article, "slug = ?", articleSlug).Error; err != nil {
 		// If article not found
@@ -157,8 +164,14 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update article", err)
 	}
 
+	// Get User
+	user := ctx.Locals("user").(*entity.User)
+	if user == nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusUnauthorized, "Failed to update article", errors.New("user not found"))
+	}
+
 	// Parse request body
-	request := new(request.ArticleRequest)
+	request := new(request.UpdateArticleRequest)
 	if err := ctx.BodyParser(request); err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to update article", err)
 	}
@@ -169,11 +182,18 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 	}
 
 	// Update article
-	article.Title = request.Title
-	article.Slug = request.Slug
-	article.Content = request.Content
-	article.CategoryID = request.CategoryID
-	article.AuthorID = request.AuthorID
+    if request.Title != nil {
+        article.Title = *request.Title
+    }
+    if request.Slug != nil {
+        article.Slug = *request.Slug
+    }
+    if request.Content != nil {
+        article.Content = *request.Content
+    }
+    if request.CategoryID != nil {
+        article.CategoryID = *request.CategoryID
+    }
 
 	// Save the thumbnail file if provided
 	if _, err := ctx.FormFile("thumbnail"); err == nil {
@@ -193,7 +213,7 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 	// Handle tags
 	tags, err := utils.CreateOrFindTags(request.Tags)
 	if err != nil {
-		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update article", err)
 	}
 
 	if err := database.DB.Save(&article).Error; err != nil {
@@ -202,7 +222,7 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 
 	// Associate tags
 	if err := utils.AssociateTagsWithArticle(article.ID, tags); err != nil {
-		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update article", err)
 	}
 
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated article")
@@ -212,13 +232,21 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 // @Summary Delete an article by its slug
 // @Description Deletes an article specified by the slug from the database. Also deletes the associated thumbnail image from the server.
 // @Tags Articles
+// @Accept  json
 // @Produce  json
+// @Param Authorization header string true "Bearer token"
 // @Param slug path string true "Article Slug"
 // @Router /articles/{slug} [delete]
 func DeleteArticle(ctx *fiber.Ctx) error {
 	articleSlug := ctx.Params("slug")
 
-	// Check if article exist
+	// Get User
+	user := ctx.Locals("user").(*entity.User)
+	if user == nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusUnauthorized, "Failed to delete article", errors.New("user not found"))
+	}
+
+	// Check if article exists
 	var article entity.Article
 	if err := database.DB.First(&article, "slug = ?", articleSlug).Error; err != nil {
 		// If article not found
@@ -227,6 +255,11 @@ func DeleteArticle(ctx *fiber.Ctx) error {
 		}
 		// If error occurred
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete article", err)
+	}
+
+	// Check if the user is the author of the article
+	if article.AuthorID != user.ID {
+		return utils.SendErrorResponse(ctx, fiber.StatusForbidden, "Failed to delete article", errors.New("you are not the author of this article"))
 	}
 
 	// Delete thumbnail

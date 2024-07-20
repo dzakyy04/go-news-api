@@ -16,6 +16,7 @@ import (
 // @Description Creates a new comment for the specified article. Requires user to be authenticated and the article to exist.
 // @Tags Comments
 // @Produce  json
+// @Param Authorization header string true "Bearer token"
 // @Param slug path string true "Article Slug"
 // @Param content formData string true "Comment content"
 // @Router /articles/{slug}/comments [post]
@@ -68,6 +69,7 @@ func CreateComment(ctx *fiber.Ctx) error {
 // @Description Updates the specified comment if the user is the owner. Requires user to be authenticated and the comment to exist.
 // @Tags Comments
 // @Produce  json
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Comment ID"
 // @Param content formData string true "Updated comment content"
 // @Router /comments/{id} [put]
@@ -121,6 +123,7 @@ func UpdateComment(ctx *fiber.Ctx) error {
 // @Description Deletes an existing comment. Requires user to be authenticated and authorized to delete the comment.
 // @Tags Comments
 // @Produce  json
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Comment ID"
 // @Router /comments/{id} [delete]
 func DeleteComment(ctx *fiber.Ctx) error {

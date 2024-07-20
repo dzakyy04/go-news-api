@@ -13,24 +13,12 @@ var Validate *validator.Validate
 func init() {
 	Validate = validator.New()
 	Validate.RegisterValidation("category_exists", CategoryExists)
-	Validate.RegisterValidation("author_exists", AuthorExists)
 }
 
 func CategoryExists(fl validator.FieldLevel) bool {
 	categoryID := fl.Field().Uint()
 	var category entity.Category
 	if err := database.DB.First(&category, "id = ?", categoryID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return false
-		}
-	}
-	return true
-}
-
-func AuthorExists(fl validator.FieldLevel) bool {
-	authorID := fl.Field().Uint()
-	var author entity.User
-	if err := database.DB.First(&author, "id = ?", authorID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return false
 		}
@@ -52,8 +40,6 @@ func FormatValidationError(err validator.FieldError) string {
 		return err.Field() + " must be equal to " + err.Param()
 	case "category_exists":
 		return "Category does not exist"
-	case "author_exists":
-		return "Author does not exist"
 	default:
 		return err.Error()
 	}
