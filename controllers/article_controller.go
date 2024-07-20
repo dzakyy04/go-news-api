@@ -17,6 +17,7 @@ func GetAllArticles(ctx *fiber.Ctx) error {
 	if err := database.DB.Preload("Category").
 		Preload("Author").
 		Preload("Comments.User").
+		Preload("Tags").
 		Find(&articles).Error; err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch articles", err)
 	}
@@ -36,6 +37,7 @@ func GetArticleBySlug(ctx *fiber.Ctx) error {
 	if err := database.DB.Preload("Category").
 		Preload("Author").
 		Preload("Comments.User").
+		Preload("Tags").
 		First(&article, "slug = ?", articleSlug).Error; err != nil {
 		// If article not found
 		if err == gorm.ErrRecordNotFound {
@@ -77,6 +79,16 @@ func CreateArticle(ctx *fiber.Ctx) error {
 		Content:    request.Content,
 		CategoryID: request.CategoryID,
 		AuthorID:   request.AuthorID,
+	}
+
+	// Handle tags
+	tags, err := utils.CreateOrFindTags(request.Tags)
+	if err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
+	}
+
+	if err := utils.AssociateTagsWithArticle(article.ID, tags); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
 	}
 
 	if err := database.DB.Create(&article).Error; err != nil {
@@ -131,6 +143,16 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 			return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update article", err)
 		}
 		article.Thumbnail = thumbnailPath
+	}
+
+	// Handle tags
+	tags, err := utils.CreateOrFindTags(request.Tags)
+	if err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
+	}
+
+	if err := utils.AssociateTagsWithArticle(article.ID, tags); err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
 	}
 
 	if err := database.DB.Save(&article).Error; err != nil {

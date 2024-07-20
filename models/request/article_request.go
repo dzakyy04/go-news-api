@@ -7,4 +7,5 @@ type ArticleRequest struct {
 	Content    string `json:"content" validate:"required"`
 	CategoryID uint   `json:"category_id" form:"category_id" validate:"required,category_exists"`
 	AuthorID   uint   `json:"author_id" form:"author_id" validate:"required,author_exists"`
+	Tags       []string  `json:"tags" validate:"required"`
 }
