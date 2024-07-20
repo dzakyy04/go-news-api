@@ -1,9 +1,5 @@
 package request
 
-type CreateCommentRequest struct {
-	Content string `json:"content"`
-}
-
-type UpdateCommentRequest struct {
+type CommentRequest struct {
 	Content string `json:"content"`
 }

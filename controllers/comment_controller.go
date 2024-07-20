@@ -31,7 +31,7 @@ func CreateComment(ctx *fiber.Ctx) error {
 	}
 
 	// Parse request body
-	request := new(request.CreateCommentRequest)
+	request := new(request.CommentRequest)
 	if err := ctx.BodyParser(request); err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to create comment", err)
 	}
@@ -78,8 +78,13 @@ func UpdateComment(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update comment", err)
 	}
 
+	// Check if the user is the owner of the comment
+	if comment.UserID != user.ID {
+		return utils.SendErrorResponse(ctx, fiber.StatusForbidden, "Failed to update comment", errors.New("you are not allowed to update this comment"))
+	}
+
 	// Parse request body
-	request := new(request.UpdateCommentRequest)
+	request := new(request.CommentRequest)
 	if err := ctx.BodyParser(request); err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to update comment", err)
 	}

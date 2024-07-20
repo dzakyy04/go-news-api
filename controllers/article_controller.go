@@ -27,16 +27,16 @@ func GetAllArticles(ctx *fiber.Ctx) error {
 	})
 }
 
-func GetArticleById(ctx *fiber.Ctx) error {
-	// Get article ID from URL parameter
-	articleId := ctx.Params("id")
+func GetArticleBySlug(ctx *fiber.Ctx) error {
+	// Get article slug from URL parameter
+	articleSlug := ctx.Params("slug")
 
-	// Find article by ID
+	// Find article by slug
 	var article entity.Article
 	if err := database.DB.Preload("Category").
 		Preload("Author").
 		Preload("Comments.User").
-		First(&article, "id = ?", articleId).Error; err != nil {
+		First(&article, "slug = ?", articleSlug).Error; err != nil {
 		// If article not found
 		if err == gorm.ErrRecordNotFound {
 			return utils.SendErrorResponse(ctx, fiber.StatusNotFound, "Failed to fetch article", err)
@@ -51,7 +51,7 @@ func GetArticleById(ctx *fiber.Ctx) error {
 }
 
 func CreateArticle(ctx *fiber.Ctx) error {
-	request := new(request.CreateArticleRequest)
+	request := new(request.ArticleRequest)
 
 	// Parse request body
 	if err := ctx.BodyParser(request); err != nil {
@@ -105,7 +105,7 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 	}
 
 	// Parse request body
-	request := new(request.UpdateArticleRequest)
+	request := new(request.ArticleRequest)
 	if err := ctx.BodyParser(request); err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to update article", err)
 	}

@@ -1,5 +1,5 @@
 package request
 
-type CrudTagRequest struct {
+type TagRequest struct {
 	Name string `json:"name" validate:"required"`
 }

@@ -45,7 +45,7 @@ func GetTagById(ctx *fiber.Ctx) error {
 }
 
 func CreateTag(ctx *fiber.Ctx) error {
-	request := new(request.CrudTagRequest)
+	request := new(request.TagRequest)
 
 	// Parse request body
 	if err := ctx.BodyParser(request); err != nil {
@@ -84,7 +84,7 @@ func UpdateTag(ctx *fiber.Ctx) error {
 	}
 
 	// Parse request body
-	request := new(request.CrudTagRequest)
+	request := new(request.TagRequest)
 	if err := ctx.BodyParser(request); err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to update tag", err)
 	}

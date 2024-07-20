@@ -222,7 +222,7 @@ func GetProfile(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusUnauthorized, "Unauthorized", errors.New("user not found"))
 	}
 
-	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully get profile")
+	return utils.SendSuccessResponseWithData(ctx, fiber.StatusOK, "Successfully get profile", fiber.Map{"user": user})
 }
 
 func SendResetPasswordEmail(ctx *fiber.Ctx) error {

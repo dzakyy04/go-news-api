@@ -45,7 +45,7 @@ func GetCategoryById(ctx *fiber.Ctx) error {
 }
 
 func CreateCategory(ctx *fiber.Ctx) error {
-	request := new(request.CreateCategoryRequest)
+	request := new(request.CategoryRequest)
 
 	// Parse request body
 	if err := ctx.BodyParser(request); err != nil {
@@ -85,7 +85,7 @@ func UpdateCategory(ctx *fiber.Ctx) error {
 	}
 
 	// Parse request body
-	request := new(request.UpdateCategoryRequest)
+	request := new(request.CategoryRequest)
 	if err := ctx.BodyParser(request); err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusBadRequest, "Failed to update category", err)
 	}
