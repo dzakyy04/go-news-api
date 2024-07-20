@@ -13,6 +13,17 @@ import (
 	"gorm.io/gorm"
 )
 
+// Register godoc
+// @Summary Register a new user
+// @Description Registers a new user with name, email, and password.
+// @Tags Auth
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param name formData string true "User Name"
+// @Param email formData string true "User Email"
+// @Param password formData string true "User Password"
+// @Param password_confirmation formData string true "User Password Confirmation"
+// @Router /register [post]
 func Register(ctx *fiber.Ctx) error {
 	request := new(request.RegisterRequest)
 
@@ -47,6 +58,15 @@ func Register(ctx *fiber.Ctx) error {
 	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Sucessfully registered")
 }
 
+// Login godoc
+// @Summary User login
+// @Description Logs in a user with email and password, and returns a JWT token.
+// @Tags Auth
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param email formData string true "User Email"
+// @Param password formData string true "User Password"
+// @Router /login [post]
 func Login(ctx *fiber.Ctx) error {
 	request := new(request.LoginRequest)
 
@@ -89,6 +109,14 @@ func Login(ctx *fiber.Ctx) error {
 	})
 }
 
+// SendVerificationEmail godoc
+// @Summary Send verification email
+// @Description Sends a verification email to the user with a generated OTP if the email is not already verified.
+// @Tags Auth
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param email formData string true "User Email"
+// @Router /email-verification/request [post]
 func SendVerificationEmail(ctx *fiber.Ctx) error {
 	request := new(request.SendVerificationEmailRequest)
 
@@ -161,6 +189,15 @@ func SendVerificationEmail(ctx *fiber.Ctx) error {
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully sent verification email")
 }
 
+// VerifyEmail godoc
+// @Summary Verify email
+// @Description Verifies a user's email address using an OTP code sent to the email. The email must be provided, and the OTP code must match and be valid.
+// @Tags Auth
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param email formData string true "User Email"
+// @Param otp formData string true "OTP Code"
+// @Router /email-verification/verify [post]
 func VerifyEmail(ctx *fiber.Ctx) error {
 	request := new(request.VerifyEmailRequest)
 
@@ -214,6 +251,14 @@ func VerifyEmail(ctx *fiber.Ctx) error {
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Email has been verified")
 }
 
+// GetProfile godoc
+// @Summary Get user profile
+// @Description Retrieves the profile information of the currently authenticated user. Requires a valid Bearer token in the Authorization header.
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Param Authorization header string true "Bearer token"
+// @Router /profile [get]
 func GetProfile(ctx *fiber.Ctx) error {
 	// Get user from context
 	user := ctx.Locals("user").(*entity.User)
@@ -225,6 +270,14 @@ func GetProfile(ctx *fiber.Ctx) error {
 	return utils.SendSuccessResponseWithData(ctx, fiber.StatusOK, "Successfully get profile", fiber.Map{"user": user})
 }
 
+// SendResetPasswordEmail godoc
+// @Summary Send reset password email
+// @Description Sends a reset password email to the user with a one-time password (OTP). Requires the user's email address in the request body.
+// @Tags Auth
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param email formData string true "User's email address"
+// @Router /reset-password/request [post]
 func SendResetPasswordEmail(ctx *fiber.Ctx) error {
 	request := new(request.SendResetPasswordEmailRequest)
 
@@ -292,6 +345,15 @@ func SendResetPasswordEmail(ctx *fiber.Ctx) error {
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully sent reset password email")
 }
 
+// VerifyOtpReset godoc
+// @Summary Verify OTP for password reset
+// @Description Verifies the OTP sent for resetting the password. Requires the user's email and OTP in the request body.
+// @Tags Auth
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param email formData string true "User's email address"
+// @Param otp formData string true "One-time password (OTP)"
+// @Router /reset-password/verify [post]
 func VerifyOtpReset(ctx *fiber.Ctx) error {
 	request := new(request.VerifyOtpResetRequest)
 
@@ -344,6 +406,16 @@ func VerifyOtpReset(ctx *fiber.Ctx) error {
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully verified OTP")
 }
 
+// ResetPassword godoc
+// @Summary Reset password
+// @Description Resets the user's password using the OTP sent for password reset. Requires the user's email, OTP, and new password in the request body.
+// @Tags Auth
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param email formData string true "User's email address"
+// @Param new_password formData string true "New password"
+// @Param new_password_confirmation formData string true "New password confirmation"
+// @Router /reset-password [post]
 func ResetPassword(ctx *fiber.Ctx) error {
 	request := new(request.ResetPasswordRequest)
 

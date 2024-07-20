@@ -11,6 +11,14 @@ import (
 	"gorm.io/gorm"
 )
 
+// CreateComment godoc
+// @Summary Create a comment for an article
+// @Description Creates a new comment for the specified article. Requires user to be authenticated and the article to exist.
+// @Tags Comments
+// @Produce  json
+// @Param slug path string true "Article Slug"
+// @Param content formData string true "Comment content"
+// @Router /articles/{slug}/comments [post]
 func CreateComment(ctx *fiber.Ctx) error {
 	// Get User
 	user := ctx.Locals("user").(*entity.User)
@@ -55,6 +63,14 @@ func CreateComment(ctx *fiber.Ctx) error {
 	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created comment")
 }
 
+// UpdateComment godoc
+// @Summary Update an existing comment
+// @Description Updates the specified comment if the user is the owner. Requires user to be authenticated and the comment to exist.
+// @Tags Comments
+// @Produce  json
+// @Param id path string true "Comment ID"
+// @Param content formData string true "Updated comment content"
+// @Router /comments/{id} [put]
 func UpdateComment(ctx *fiber.Ctx) error {
 	// Get User
 	user := ctx.Locals("user").(*entity.User)
@@ -100,6 +116,13 @@ func UpdateComment(ctx *fiber.Ctx) error {
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated comment")
 }
 
+// DeleteComment godoc
+// @Summary Delete an existing comment
+// @Description Deletes an existing comment. Requires user to be authenticated and authorized to delete the comment.
+// @Tags Comments
+// @Produce  json
+// @Param id path string true "Comment ID"
+// @Router /comments/{id} [delete]
 func DeleteComment(ctx *fiber.Ctx) error {
 	// Get User
 	user := ctx.Locals("user").(*entity.User)
@@ -117,6 +140,11 @@ func DeleteComment(ctx *fiber.Ctx) error {
 		}
 		// If error occurred
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to delete comment", err)
+	}
+
+	// Check if the user is the owner of the comment
+	if comment.UserID != user.ID {
+		return utils.SendErrorResponse(ctx, fiber.StatusForbidden, "Failed to delete comment", errors.New("you are not allowed to delete this comment"))
 	}
 
 	// Delete comment

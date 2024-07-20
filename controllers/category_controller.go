@@ -10,6 +10,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// GetAllCategories godoc
+// @Summary Get all categories
+// @Description Fetches all categories from the database.
+// @Tags Categories
+// @Accept  json
+// @Produce  json
+// @Router /categories [get]
 func GetAllCategories(ctx *fiber.Ctx) error {
 	var categories []entity.Category
 
@@ -20,10 +27,18 @@ func GetAllCategories(ctx *fiber.Ctx) error {
 
 	return utils.SendSuccessResponseWithData(ctx, fiber.StatusOK, "Successfully fetched categories", fiber.Map{
 		"categories":      categories,
-		"totalCategories": len(categories),
+		"total_categories": len(categories),
 	})
 }
 
+// GetCategoryById godoc
+// @Summary Get category by ID
+// @Description Fetches a category by its ID from the database.
+// @Tags Categories
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Category ID"
+// @Router /categories/{id} [get]
 func GetCategoryById(ctx *fiber.Ctx) error {
 	// Get category ID from URL parameter
 	categoryId := ctx.Params("id")
@@ -44,6 +59,15 @@ func GetCategoryById(ctx *fiber.Ctx) error {
 	})
 }
 
+// CreateCategory godoc
+// @Summary Create category
+// @Description Creates a new category in the database.
+// @Tags Categories
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param name formData string true "Category Name"
+// @Param description formData string true "Category Description"
+// @Router /categories [post]
 func CreateCategory(ctx *fiber.Ctx) error {
 	request := new(request.CategoryRequest)
 
@@ -70,6 +94,16 @@ func CreateCategory(ctx *fiber.Ctx) error {
 	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created category")
 }
 
+// UpdateCategory godoc
+// @Summary Update category
+// @Description Updates a category in the database.
+// @Tags Categories
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param id path int true "Category ID"
+// @Param name formData string true "Category Name"
+// @Param description formData string true "Category Description"
+// @Router /categories/{id} [put]
 func UpdateCategory(ctx *fiber.Ctx) error {
 	categoryId := ctx.Params("id")
 
@@ -106,6 +140,14 @@ func UpdateCategory(ctx *fiber.Ctx) error {
 	return utils.SendSuccessResponse(ctx, fiber.StatusOK, "Successfully updated category")
 }
 
+// DeleteCategory godoc
+// @Summary Delete category
+// @Description Deletes a category from the database.
+// @Tags Categories
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Category ID"
+// @Router /categories/{id} [delete]
 func DeleteCategory(ctx *fiber.Ctx) error {
 	categoryId := ctx.Params("id")
 
