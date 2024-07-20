@@ -83,10 +83,6 @@ func CreateArticle(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
 	}
 
-	if err := database.DB.Preload("Category").Preload("Author").Preload("Comments.User").First(&article, article.ID).Error; err != nil {
-		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create article", err)
-	}
-
 	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created article")
 }
 
@@ -138,10 +134,6 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 	}
 
 	if err := database.DB.Save(&article).Error; err != nil {
-		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update article", err)
-	}
-
-	if err := database.DB.Preload("Category").Preload("Author").Preload("Comments.User").First(&article, article.ID).Error; err != nil {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to update article", err)
 	}
 

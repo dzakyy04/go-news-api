@@ -52,10 +52,6 @@ func CreateComment(ctx *fiber.Ctx) error {
 		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create comment", err)
 	}
 
-	if err := database.DB.Preload("User").First(&comment, "id = ?", comment.ID).Error; err != nil {
-		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to create comment", err)
-	}
-
 	return utils.SendSuccessResponse(ctx, fiber.StatusCreated, "Successfully created comment")
 }
 
