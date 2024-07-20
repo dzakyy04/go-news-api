@@ -39,6 +39,7 @@ func RouteInit(route *fiber.App) {
 
 	// Article routes
 	api.Get("/articles", controllers.GetAllArticles)
+	api.Get("/articles/me", middleware.AuthMiddleware, controllers.GetMyArticles)
 	api.Get("/articles/:slug", controllers.GetArticleBySlug)
 	api.Post("/articles", middleware.AuthMiddleware, controllers.CreateArticle)
 	api.Put("/articles/:slug", middleware.AuthMiddleware, controllers.UpdateArticle)

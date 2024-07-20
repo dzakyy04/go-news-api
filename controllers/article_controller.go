@@ -36,6 +36,37 @@ func GetAllArticles(ctx *fiber.Ctx) error {
 	})
 }
 
+// GetMyArticles godoc
+// @Summary Get all articles by the authenticated user
+// @Description Retrieves a list of all articles created by the currently authenticated user along with their related category, author, comments, and tags.
+// @Tags Articles
+// @Accept  json
+// @Produce  json
+// @Param Authorization header string true "Bearer token"
+// @Router /articles/me [get]
+func GetMyArticles(ctx *fiber.Ctx) error {
+	// Get User
+	user := ctx.Locals("user").(*entity.User)
+	if user == nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusUnauthorized, "Failed to create article", errors.New("user not found"))
+	}
+
+	// Fetch all articles
+	var articles []entity.Article
+	if err := database.DB.Preload("Category").
+		Preload("Author").
+		Preload("Comments.User").
+		Preload("Tags").
+		Where("author_id = ?", user.ID).Find(&articles).Error; err != nil {
+		return utils.SendErrorResponse(ctx, fiber.StatusInternalServerError, "Failed to fetch articles", err)
+	}
+
+	return utils.SendSuccessResponseWithData(ctx, fiber.StatusOK, "Successfully fetched articles", fiber.Map{
+		"articles":       articles,
+		"total_articles": len(articles),
+	})
+}
+
 // GetArticleBySlug godoc
 // @Summary Get an article by its slug
 // @Description Retrieves a single article based on the provided slug, including its related category, author, comments, and tags.
@@ -182,18 +213,18 @@ func UpdateArticle(ctx *fiber.Ctx) error {
 	}
 
 	// Update article
-    if request.Title != nil {
-        article.Title = *request.Title
-    }
-    if request.Slug != nil {
-        article.Slug = *request.Slug
-    }
-    if request.Content != nil {
-        article.Content = *request.Content
-    }
-    if request.CategoryID != nil {
-        article.CategoryID = *request.CategoryID
-    }
+	if request.Title != nil {
+		article.Title = *request.Title
+	}
+	if request.Slug != nil {
+		article.Slug = *request.Slug
+	}
+	if request.Content != nil {
+		article.Content = *request.Content
+	}
+	if request.CategoryID != nil {
+		article.CategoryID = *request.CategoryID
+	}
 
 	// Save the thumbnail file if provided
 	if _, err := ctx.FormFile("thumbnail"); err == nil {
