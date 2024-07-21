@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go-news-api/cmd"
 	"go-news-api/database"
 	"go-news-api/routes"
 
@@ -29,6 +30,9 @@ func main() {
 
 	// Initialize fiber app
 	app := fiber.New()
+
+	// Cobra for cli
+	cmd.Execute()
 
 	// Swagger for api docs
 	app.Get("/swagger/*", swagger.HandlerDefault)
